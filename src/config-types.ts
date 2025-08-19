@@ -24,6 +24,14 @@ export type Options = {
       src_include: RegExp[];
       content_include: RegExp[];
     };
+    offload: {
+      when: // Default: 'never' (safe - scripts can be finicky)
+      | 'never' // No scripts get offloaded
+      | 'below-the-fold' // Scripts are offloaded only if they are below the fold
+      | 'always'; // All scripts get offloaded (not recommended)
+      src_include: RegExp[];
+      content_include: RegExp[];
+    };
   };
   css: {
     inline_critical_css: boolean;

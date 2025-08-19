@@ -101,6 +101,19 @@ async function analyse(state: GlobalState, file: string): Promise<void> {
     appendToBody
   );
 
+  // Add defer.js if any scripts were offloaded
+  if (state.hasOffloadedScripts && !('defer-js' in appendToBody)) {
+    const fs = state.vfs ?? fsp;
+    const deferJsPath = path.join(process.cwd(), 'node_modules/@shinsenter/defer.js/dist/defer.min.js');
+    const deferJsContent = await fs.readFile(deferJsPath, 'utf8');
+    appendToBody['defer-js'] = `
+        <script defer>
+          ${deferJsContent}
+          Defer.all('[data-offload]', 0, true);
+        </script>
+      `;
+  }
+
   // Remove the fold
   //
   if (theFold) {
@@ -432,7 +445,7 @@ async function processImage(
     // Let's go to avif -> avif , webp -> webp, else * -> webp
     srcToFormat =
       (await originalImage.getMime()) === 'image/avif' ||
-      (await originalImage.getMime()) === 'image/webp'
+        (await originalImage.getMime()) === 'image/webp'
         ? 'unchanged'
         : 'webp';
   }
@@ -455,7 +468,7 @@ async function processImage(
     const newSrc = path.join(
       path.dirname(attrib_src),
       path.basename(attrib_src, path.extname(attrib_src)) +
-        `.${newImage.format}`
+      `.${newImage.format}`
     );
 
     if (!state.compressedFiles.has(newFilename) && !state.args.nowrite) {
@@ -522,9 +535,8 @@ async function processImage(
         case 'webp':
         case 'jpg':
         case 'png':
-          datauri = `data:image/${
-            ifmt === 'jpg' ? 'jpeg' : ifmt
-          };base64,${imageToEmbed.data.toString('base64')}`;
+          datauri = `data:image/${ifmt === 'jpg' ? 'jpeg' : ifmt
+            };base64,${imageToEmbed.data.toString('base64')}`;
           break;
       }
 
@@ -674,9 +686,8 @@ async function processImage(
         continue;
       }
 
-      const source = `<source ${
-        sizes ? `sizes="${sizes}"` : ''
-      } srcset="${srcset}" type="${s.mime}">`;
+      const source = `<source ${sizes ? `sizes="${sizes}"` : ''
+        } srcset="${srcset}" type="${s.mime}">`;
       img.before(source); // Append before this way existing sources are always top priority
     }
   }
@@ -865,10 +876,9 @@ async function generateSrcSet(
   const ext = path.extname(originalImage.src);
   const fullbasename = originalImage.src.slice(0, -ext.length);
   const imageSrc = (addition: string) =>
-    `${fullbasename}${addition}${
-      options.toFormat === 'unchanged'
-        ? ext
-        : `.${options.toFormat?.split('+')[0]}`
+    `${fullbasename}${addition}${options.toFormat === 'unchanged'
+      ? ext
+      : `.${options.toFormat?.split('+')[0]}`
     }`;
 
   const meta = await originalImage.getImageMeta();

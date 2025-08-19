@@ -34,6 +34,8 @@ export class GlobalState {
 
   compressedFiles: Set<string> = new Set();
 
+  hasOffloadedScripts: boolean = false;
+
   issues: Map<string, Issue[]> = new Map();
 
   installed_dependencies: Set<string> = new Set();

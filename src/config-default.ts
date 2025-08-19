@@ -18,6 +18,11 @@ const default_options: Options = {
       src_include: [],
       content_include: [],
     },
+    offload: {
+      when: 'never',
+      src_include: [],
+      content_include: [],
+    },
   },
   image: {
     embed_size: 1500,

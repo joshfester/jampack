@@ -1,53 +1,89 @@
 import * as cheerio from '@divriots/cheerio';
 import type { GlobalState } from '../state.js';
 
-export async function processScript(
-  state: GlobalState,
-  htmlfile: string,
-  script: cheerio.Cheerio<cheerio.Element>,
-  isAboveTheFold: boolean,
-  appendToBody: Record<string, string>
-): Promise<void> {
-  const deferOptions = state.options.js.defer;
+type ScriptOptions = {
+  when: 'never' | 'below-the-fold' | 'always';
+  src_include: RegExp[];
+  content_include: RegExp[];
+};
 
-  // Skip if defer is disabled
-  if (
-    deferOptions.when === 'never' ||
-    (deferOptions.when === 'below-the-fold' && isAboveTheFold)
-  ) {
-    return;
-  }
+function shouldProcessScript(
+  options: ScriptOptions,
+  isAboveTheFold: boolean
+): boolean {
+  if (options.when === 'never') return false;
+  if (options.when === 'below-the-fold' && isAboveTheFold) return false;
+  return true;
+}
 
-  // Skip if script already has async or defer attributes
-  const existingAsync = script.attr('async');
-  const existingDefer = script.attr('defer');
-  if (existingAsync !== undefined || existingDefer !== undefined) {
-    return;
-  }
-
-  // Skip module scripts - they are deferred by default
-  const type = script.attr('type');
-  if (type === 'module') {
-    return;
-  }
-
-  const src = script.attr('src');
-  const innerHTML = script.html();
-
-  // Check if script matches defer patterns
-  let shouldDefer = false;
-
+function matchesPatterns(
+  src: string | undefined,
+  innerHTML: string | null,
+  options: ScriptOptions
+): boolean {
   // For external scripts, check src patterns
-  if (src && deferOptions.src_include.length > 0) {
-    shouldDefer = deferOptions.src_include.some(pattern => !!src.match(pattern));
+  if (src && options.src_include.length > 0) {
+    if (options.src_include.some(pattern => !!src.match(pattern))) {
+      return true;
+    }
   }
 
   // For inline scripts, check content patterns
-  if (!shouldDefer && innerHTML && deferOptions.content_include.length > 0) {
-    shouldDefer = deferOptions.content_include.some(pattern => { console.log("============== Checking script content: ", pattern, innerHTML); return !!innerHTML.match(pattern); });
+  if (innerHTML && options.content_include.length > 0) {
+    if (options.content_include.some(pattern => !!innerHTML.match(pattern))) {
+      return true;
+    }
   }
 
-  if (shouldDefer) {
-    script.attr('defer', '');;
+  return false;
+}
+
+export async function processScript(
+  state: GlobalState,
+  _htmlfile: string,
+  script: cheerio.Cheerio<cheerio.Element>,
+  isAboveTheFold: boolean,
+  _appendToBody: Record<string, string>
+): Promise<void> {
+  const type = script.attr('type');
+
+  // Skip non-javascript
+  if (type && type !== 'module' && type !== 'text/javascript') {
+    return;
+  }
+
+  const offloadOptions = state.options.js.offload;
+  const deferOptions = state.options.js.defer;
+  const src = script.attr('src');
+  const innerHTML = script.html();
+
+
+  // Try offload first (takes priority over defer)
+  if (
+    shouldProcessScript(offloadOptions, isAboveTheFold)
+    && matchesPatterns(src, innerHTML, offloadOptions)
+  ) {
+    if (type) {
+      script.attr('data-type', type);
+    }
+
+    // Set type to text/plain to prevent execution
+    script.attr('type', 'text/plain');
+
+    // Add data-offload attribute
+    script.attr('data-offload', '');
+
+    // Mark that we have offloaded scripts
+    state.hasOffloadedScripts = true;
+    return;
+  }
+
+  // Try defer if script was not offloaded
+  if (
+    shouldProcessScript(deferOptions, isAboveTheFold)
+    && matchesPatterns(src, innerHTML, deferOptions)
+    && !script.attr('async')
+  ) {
+    script.attr('defer', '');
   }
 }
