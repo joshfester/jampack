@@ -22,6 +22,7 @@ import { GlobalState } from './state.js';
 import { processIframe } from './optimizers/process-iframe.js';
 import { processVideo } from './optimizers/process-video.js';
 import { processScript } from './optimizers/process-script.js';
+import { install_defer_js } from './utils/install-dep.js';
 
 const UNPIC_DEFAULT_HOST_REGEX = /^https:\/\/n\//g;
 const ABOVE_FOLD_DATA_ATTR = 'data-abovethefold';
@@ -102,16 +103,8 @@ async function analyse(state: GlobalState, file: string): Promise<void> {
   );
 
   // Add defer.js if any scripts were offloaded
-  if (state.hasOffloadedScripts && !('defer-js' in appendToBody)) {
-    const fs = state.vfs ?? fsp;
-    const deferJsPath = path.join(process.cwd(), 'node_modules/@shinsenter/defer.js/dist/defer.min.js');
-    const deferJsContent = await fs.readFile(deferJsPath, 'utf8');
-    appendToBody['defer-js'] = `
-        <script defer>
-          ${deferJsContent}
-          Defer.all('[data-offload]', 0, true);
-        </script>
-      `;
+  if (state.hasOffloadedScripts) {
+    await install_defer_js(state, file, appendToBody);
   }
 
   // Remove the fold

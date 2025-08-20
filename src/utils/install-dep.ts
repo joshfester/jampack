@@ -87,3 +87,25 @@ export async function install_lozad(
     appendToBody
   );
 }
+
+export async function install_defer_js(
+  state: GlobalState,
+  _html_file: string,
+  appendToBody: Record<string, string>
+): Promise<void> {
+  const fs = state.vfs ?? fsp;
+  
+  // Read defer.js content using require.resolve for proper package resolution
+  const deferJsPath = require.resolve('@shinsenter/defer.js/dist/defer.min.js');
+  const deferJsContent = await fs.readFile(deferJsPath, 'utf8');
+  
+  // Add defer.js inline script if not already added
+  if (!('defer-js' in appendToBody)) {
+    appendToBody['defer-js'] = `
+        <script defer>
+          ${deferJsContent}
+          Defer.all('[data-offload]', 0, true);
+        </script>
+      `;
+  }
+}
