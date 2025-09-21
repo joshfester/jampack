@@ -12,9 +12,13 @@ export function fast(state: GlobalState) {
   Object.assign(state.options, deepmerge(options, fast_options_override));
 }
 
-export async function loadConfig(state: GlobalState) {
+export async function loadConfig(state: GlobalState, configPath?: string) {
   const options = default_options;
-  const proload = await load('jampack', { mustExist: false });
+  const loadOptions: any = { mustExist: false };
+  if (configPath) {
+    loadOptions.filePath = configPath;
+  }
+  const proload = await load('jampack', loadOptions);
   if (proload) {
     console.log('Merging default config with:');
     console.log(JSON.stringify(proload.value, null, 2));

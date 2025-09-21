@@ -6,6 +6,7 @@ export type Args = {
   nocache?: boolean;
   cache_folder?: string;
   sequential_compress?: boolean;
+  config?: string;
 };
 
 export type ReportItem = {

@@ -51,6 +51,7 @@ program
   )
   .option('--cleancache', 'Clean cache before running')
   .option('--nocache', 'Run with no use of cache')
+  .option('--config <config>', 'Path to jampack config file')
   .action(async (dir, options) => {
     const state = new GlobalState();
 
@@ -66,7 +67,7 @@ program
     }
 
     // Override default config with config file
-    await loadConfig(state);
+    await loadConfig(state, options.config);
 
     // Override config with fast options if set
     if (options.fast) {
