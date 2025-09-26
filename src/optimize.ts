@@ -23,6 +23,7 @@ import { processIframe } from './optimizers/process-iframe.js';
 import { processVideo } from './optimizers/process-video.js';
 import { processScript } from './optimizers/process-script.js';
 import { install_defer_js } from './utils/install-dep.js';
+import { runPlugins } from './plugins/runner.js';
 
 const UNPIC_DEFAULT_HOST_REGEX = /^https:\/\/n\//g;
 const ABOVE_FOLD_DATA_ATTR = 'data-abovethefold';
@@ -106,6 +107,9 @@ async function analyse(state: GlobalState, file: string): Promise<void> {
   if (state.hasOffloadedScripts) {
     await install_defer_js(state, file, appendToBody);
   }
+
+  // Run plugins after main optimization
+  await runPlugins(state, theFold, $, file);
 
   // Remove the fold
   //

@@ -14,6 +14,7 @@ import { cleanCache } from './cache.js';
 import { VERSION } from './packagejson.js';
 import { mkdirSync } from 'fs';
 import { join } from 'path';
+import { pluginRegistry } from './plugins/registry.js';
 
 const logo = `     __                                    __    
     |__|____    _____ ___________    ____ |  | __
@@ -52,6 +53,9 @@ program
   .option('--cleancache', 'Clean cache before running')
   .option('--nocache', 'Run with no use of cache')
   .option('--config <config>', 'Path to jampack config file')
+  .option('--preload-images <files>', 'Comma-separated list of image files to preload')
+  .option('--preload-fonts <files>', 'Comma-separated list of font files to preload')
+  .option('--fetchpriority-high <selectors>', 'Comma-separated list of CSS selectors to add fetchpriority="high"')
   .action(async (dir, options) => {
     const state = new GlobalState();
 
@@ -73,6 +77,24 @@ program
     if (options.fast) {
       fast(state);
     }
+
+    // Configure plugins based on CLI options
+    const pluginConfig: any = {};
+
+    if (options.preloadImages) {
+      pluginConfig.preloadImages = options.preloadImages.split(',').map((s: string) => s.trim());
+    }
+
+    if (options.preloadFonts) {
+      pluginConfig.preloadFonts = options.preloadFonts.split(',').map((s: string) => s.trim());
+    }
+
+    if (options.fetchpriorityHigh) {
+      pluginConfig.fetchpriorityHigh = options.fetchpriorityHigh.split(',').map((s: string) => s.trim());
+    }
+
+    // Register plugins
+    pluginRegistry.registerBuiltinPlugins(pluginConfig);
 
     // Clean cache
     await cleanCache(state, options.cleancache);

@@ -106,4 +106,9 @@ export type Options = {
   misc: {
     prefetch_links: 'in-viewport' | 'off';
   };
+  plugins?: {
+    preloadImages?: string[];
+    preloadFonts?: string[];
+    fetchpriorityHigh?: string[];
+  };
 };
