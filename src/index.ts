@@ -190,9 +190,9 @@ function printSummary($state: GlobalState) {
       formatBytes($state.summary.dataLenUncompressed),
       formatBytes($state.summary.dataLenCompressed),
       '-' +
-        formatBytes(
-          $state.summary.dataLenUncompressed - $state.summary.dataLenCompressed
-        ),
+      formatBytes(
+        $state.summary.dataLenUncompressed - $state.summary.dataLenCompressed
+      ),
     ];
     dataTable.push(total);
 

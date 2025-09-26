@@ -8,7 +8,7 @@ import type { GlobalState } from '../state.js';
 export class PreloadFontsPlugin implements OptimizerPlugin {
   name = 'preload-fonts';
 
-  constructor(private fontFiles: string[]) {}
+  constructor(private fontFiles: string[]) { }
 
   async execute(
     state: GlobalState,
@@ -38,7 +38,7 @@ export class PreloadFontsPlugin implements OptimizerPlugin {
       }
 
       // Add preload link with crossorigin for fonts
-      const preloadLink = `<link rel="preload" as="font" href="${fontFile}" crossorigin>`;
+      const preloadLink = `<link rel="preload" as="font" href="${fontFile}" fetchpriority="high" crossorigin>`;
       head.append(preloadLink);
 
       state.reportIssue(file, {

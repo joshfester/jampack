@@ -8,7 +8,7 @@ import type { GlobalState } from '../state.js';
 export class PreloadImagesPlugin implements OptimizerPlugin {
   name = 'preload-images';
 
-  constructor(private imageFiles: string[]) {}
+  constructor(private imageFiles: string[]) { }
 
   async execute(
     state: GlobalState,
@@ -38,7 +38,7 @@ export class PreloadImagesPlugin implements OptimizerPlugin {
       }
 
       // Add preload link
-      const preloadLink = `<link rel="preload" as="image" href="${imageFile}">`;
+      const preloadLink = `<link rel="preload" as="image" fetchpriority="high" href="${imageFile}">`;
       head.append(preloadLink);
 
       state.reportIssue(file, {
