@@ -53,7 +53,7 @@ program
   .option('--cleancache', 'Clean cache before running')
   .option('--nocache', 'Run with no use of cache')
   .option('--config <config>', 'Path to jampack config file')
-  .option('--preload-images <files>', 'Comma-separated list of image files to preload')
+  .option('--preload-image <files...>', 'Image file to preload (can be specified multiple times)')
   .option('--preload-fonts <files>', 'Comma-separated list of font files to preload')
   .option('--fetchpriority-high <selectors>', 'Comma-separated list of CSS selectors to add fetchpriority="high"')
   .action(async (dir, options) => {
@@ -81,8 +81,8 @@ program
     // Configure plugins based on CLI options
     const pluginConfig: any = {};
 
-    if (options.preloadImages) {
-      pluginConfig.preloadImages = options.preloadImages.split(',').map((s: string) => s.trim());
+    if (options.preloadImage) {
+      pluginConfig.preloadImages = options.preloadImage;
     }
 
     if (options.preloadFonts) {
