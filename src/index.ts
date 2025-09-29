@@ -54,7 +54,7 @@ program
   .option('--nocache', 'Run with no use of cache')
   .option('--config <config>', 'Path to jampack config file')
   .option('--preload-image <files...>', 'Image file to preload (can be specified multiple times)')
-  .option('--preload-fonts <files>', 'Comma-separated list of font files to preload')
+  .option('--preload-font <files...>', 'Font file to preload (can be specified multiple times)')
   .option('--fetchpriority-high <selectors>', 'Comma-separated list of CSS selectors to add fetchpriority="high"')
   .action(async (dir, options) => {
     const state = new GlobalState();
@@ -85,8 +85,8 @@ program
       pluginConfig.preloadImages = options.preloadImage;
     }
 
-    if (options.preloadFonts) {
-      pluginConfig.preloadFonts = options.preloadFonts.split(',').map((s: string) => s.trim());
+    if (options.preloadFont) {
+      pluginConfig.preloadFonts = options.preloadFont;
     }
 
     if (options.fetchpriorityHigh) {
