@@ -2,6 +2,7 @@ import type { OptimizerPlugin, PluginConfig } from '../types/plugin.js';
 import { PreloadImagesPlugin } from './preload-images.js';
 import { PreloadFontsPlugin } from './preload-fonts.js';
 import { FetchpriorityHighPlugin } from './fetchpriority-high.js';
+import { PreconnectPlugin } from './preconnect.js';
 
 /**
  * Global plugin registry
@@ -46,6 +47,14 @@ class PluginRegistry {
 
     if (config.fetchpriorityHigh && config.fetchpriorityHigh.length > 0) {
       this.register(new FetchpriorityHighPlugin(config.fetchpriorityHigh));
+    }
+
+    if ((config.preconnectUrls && config.preconnectUrls.length > 0) ||
+        (config.preconnectUrlsCrossorigin && config.preconnectUrlsCrossorigin.length > 0)) {
+      this.register(new PreconnectPlugin(
+        config.preconnectUrls || [],
+        config.preconnectUrlsCrossorigin || []
+      ));
     }
   }
 }

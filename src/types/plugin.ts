@@ -32,4 +32,6 @@ export interface PluginConfig {
   preloadImages?: string[];
   preloadFonts?: string[];
   fetchpriorityHigh?: string[];
+  preconnectUrls?: string[];
+  preconnectUrlsCrossorigin?: string[];
 }

@@ -56,6 +56,8 @@ program
   .option('--preload-image <files...>', 'Image file to preload (can be specified multiple times)')
   .option('--preload-font <files...>', 'Font file to preload (can be specified multiple times)')
   .option('--fetchpriority-high <selectors>', 'Comma-separated list of CSS selectors to add fetchpriority="high"')
+  .option('--preconnect-url <urls...>', 'URL to add preconnect link (can be specified multiple times)')
+  .option('--preconnect-url-crossorigin <urls...>', 'URL to add preconnect link with crossorigin (can be specified multiple times)')
   .action(async (dir, options) => {
     const state = new GlobalState();
 
@@ -91,6 +93,14 @@ program
 
     if (options.fetchpriorityHigh) {
       pluginConfig.fetchpriorityHigh = options.fetchpriorityHigh.split(',').map((s: string) => s.trim());
+    }
+
+    if (options.preconnectUrl) {
+      pluginConfig.preconnectUrls = options.preconnectUrl;
+    }
+
+    if (options.preconnectUrlCrossorigin) {
+      pluginConfig.preconnectUrlsCrossorigin = options.preconnectUrlCrossorigin;
     }
 
     // Register plugins
